@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Glass Home</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px 18px;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        background:
+          radial-gradient(ellipse at 15% 5%, rgba(70, 130, 255, 0.45), transparent 38%),
+          radial-gradient(ellipse at 90% 30%, rgba(155, 100, 255, 0.28), transparent 35%),
+          linear-gradient(145deg, #080d1c, #14213b 55%, #080d1c);
+        background-attachment: fixed;
+      }
+
+      .shell {
+        max-width: 1000px;
+        margin: auto;
+      }
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px 3px 22px;
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand {
+        color: #b9c8e4;
+        font-size: 12px;
+        letter-spacing: 3px;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: #76e3bd;
+        box-shadow: 0 0 12px #76e3bd;
+      }
+
+      .fullscreen-button {
+        display: flex;
+        min-height: 34px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 11px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .fullscreen-button:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .fullscreen-button:focus-visible,
+      .recipe-button:focus-visible {
+        outline: 2px solid #b8ceff;
+        outline-offset: 2px;
+      }
+
+      .fullscreen-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .fullscreen-status {
+        position: fixed;
+        z-index: 10;
+        bottom: 18px;
+        left: 50%;
+        max-width: calc(100vw - 32px);
+        padding: 10px 14px;
+        transform: translateX(-50%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #fff;
+        background: #18243a;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .fullscreen-status:empty {
+        display: none;
+      }
+
+      .glass {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.045));
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.23), inset 0 1px rgba(255, 255, 255, 0.15);
+      }
+
+      .hero {
+        overflow: hidden;
+        margin-bottom: 17px;
+        padding: 28px;
+      }
+
+      .greeting {
+        color: #c2cde2;
+        font-size: 14px;
+      }
+
+      .clock {
+        margin: 10px 0 4px;
+        font-size: clamp(60px, 12vw, 100px);
+        font-weight: 200;
+        letter-spacing: -5px;
+      }
+
+      .clock-period {
+        margin-left: 10px;
+        color: #aebdd8;
+        font-size: 0.32em;
+        letter-spacing: 1px;
+      }
+
+      .date {
+        color: #cbd5e8;
+        font-size: 17px;
+      }
+
+      .grid,
+      .bottom {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 17px;
+      }
+
+      .card {
+        min-height: 165px;
+        padding: 23px;
+      }
+
+      .label {
+        margin-bottom: 16px;
+        color: #aebdd8;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+
+      .weatherline {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .weathericon {
+        font-size: 48px;
+      }
+
+      .temp {
+        font-size: 48px;
+        font-weight: 300;
+      }
+
+      .condition {
+        color: #cbd5e8;
+        font-size: 14px;
+      }
+
+      .details {
+        display: flex;
+        gap: 18px;
+        margin-top: 17px;
+        color: #b5c4df;
+        font-size: 12px;
+      }
+
+      .status {
+        margin-top: 14px;
+        color: #91a2c1;
+        font-size: 11px;
+      }
+
+      .verse {
+        font-size: 22px;
+        line-height: 1.45;
+      }
+
+      .ref {
+        margin-top: 12px;
+        color: #b8ceff;
+        font-size: 13px;
+      }
+
+      .verse-source,
+      .recipe-source {
+        display: inline-block;
+        color: #b8ceff;
+        font-size: 11px;
+        text-decoration: none;
+      }
+
+      .verse-source {
+        margin-top: 8px;
+      }
+
+      .verse-source:hover,
+      .recipe-source:hover {
+        text-decoration: underline;
+      }
+
+      .bottom {
+        margin-top: 17px;
+      }
+
+      .worldrow {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e8;
+        font-size: 14px;
+      }
+
+      .worldrow:last-child {
+        border: 0;
+      }
+
+      .worldrow strong {
+        color: #fff;
+        font-weight: 500;
+      }
+
+      .recipe-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .recipe-image {
+        width: 46px;
+        height: 46px;
+        flex: none;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        object-fit: cover;
+      }
+
+      .recipe-name {
+        font-size: 19px;
+        font-weight: 400;
+        line-height: 1.2;
+      }
+
+      .recipe-meta,
+      .recipe-position {
+        margin-top: 4px;
+        color: #aebdd8;
+        font-size: 11px;
+      }
+
+      .recipe-section-label {
+        margin-top: 7px;
+        color: #91a2c1;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+
+      .recipe-details {
+        min-height: 0;
+        flex: 1;
+        overflow: auto;
+      }
+
+      .recipe-copy {
+        margin-top: 2px;
+        color: #e0e7f3;
+        font-size: 12px;
+        line-height: 1.35;
+        white-space: pre-line;
+      }
+
+      .recipe-source {
+        margin-top: 7px;
+      }
+
+      .recipe-source[hidden] {
+        display: none;
+      }
+
+      .recipe-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 9px;
+      }
+
+      .recipe-buttons {
+        display: flex;
+        gap: 7px;
+      }
+
+      .recipe-button {
+        display: grid;
+        width: 32px;
+        height: 30px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 7px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        font: inherit;
+        font-size: 17px;
+        cursor: pointer;
+      }
+
+      .recipe-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .recipe-button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+
+      .footer {
+        margin: 25px 0 5px;
+        color: #7889a8;
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-align: center;
+      }
+
+      @media (max-width: 650px) {
+        body {
+          padding: 17px 13px;
+        }
+
+        .grid,
+        .bottom {
+          grid-template-columns: 1fr;
+        }
+
+        .hero,
+        .card {
+          padding: 22px;
+        }
+
+        .clock {
+          letter-spacing: -3px;
+        }
+
+        .top-actions {
+          gap: 8px;
+        }
+
+        .top-actions .brand {
+          letter-spacing: 1px;
+        }
+
+        .fullscreen-button {
+          width: 36px;
+          justify-content: center;
+          padding: 0;
+        }
+
+        .fullscreen-label {
+          display: none;
+        }
+      }
+
+      @media (min-width: 651px) and (max-height: 800px) {
+        body {
+          height: 100vh;
+          padding: 14px 18px;
+        }
+
+        .shell {
+          display: flex;
+          height: 100%;
+          flex-direction: column;
+        }
+
+        .top {
+          margin: 0 3px 14px;
+        }
+
+        .hero {
+          margin-bottom: 12px;
+          padding: 18px;
+        }
+
+        .clock {
+          margin: 4px 0;
+          font-size: clamp(56px, 9vw, 76px);
+        }
+
+        .grid,
+        .bottom {
+          min-height: 0;
+          flex: 1;
+          gap: 12px;
+        }
+
+        .bottom {
+          margin-top: 12px;
+        }
+
+        .card {
+          min-height: 0;
+          padding: 16px;
+        }
+
+        .recipe-card {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .label {
+          margin-bottom: 10px;
+        }
+
+        .details {
+          margin-top: 12px;
+        }
+
+        .status {
+          margin-top: 10px;
+        }
+
+        .footer {
+          margin: 12px 0 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="top">
+        <div class="brand">GLASS HOME</div>
+        <div class="top-actions">
+          <div class="brand"><span class="dot"></span>LIVE DISPLAY</div>
+          <button class="fullscreen-button" id="fullscreenButton" type="button" aria-label="Enter fullscreen" title="Enter fullscreen">
+            <span class="fullscreen-icon" aria-hidden="true">⛶</span>
+            <span class="fullscreen-label">Fullscreen</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="fullscreen-status" id="fullscreenStatus" role="status" aria-live="polite"></div>
+
+      <section class="glass hero">
+        <div class="greeting" id="greeting">A calm space for today</div>
+        <div class="clock">
+          <span id="clockTime">--:--</span>
+          <span class="clock-period" id="clockPeriod"></span>
+        </div>
+        <div class="date" id="date">Loading date...</div>
+      </section>
+
+      <div class="grid">
+        <section class="glass card">
+          <div class="label">WEATHER · BAMBAN, TARLAC</div>
+          <div class="weatherline">
+            <div class="weathericon" id="weatherIcon">☁️</div>
+            <div>
+              <div class="temp" id="temp">--°</div>
+              <div class="condition" id="condition">Checking weather...</div>
+            </div>
+          </div>
+          <div class="details">
+            <span id="feels">Feels like --°</span>
+            <span id="humidity">Humidity --%</span>
+          </div>
+          <div class="status" id="weatherStatus">Updates automatically</div>
+        </section>
+
+        <section class="glass card">
+          <div class="label">VERSE FOR TODAY</div>
+          <div class="verse" id="verse" aria-live="polite">Loading YouVersion's verse of the day...</div>
+          <div class="ref" id="verseRef"></div>
+          <a class="verse-source" id="verseSource" href="https://www.bible.com/verse-of-the-day" target="_blank" rel="noopener noreferrer">Open YouVersion's Verse of the Day ↗</a>
+        </section>
+      </div>
+
+      <div class="bottom">
+        <section class="glass card">
+          <div class="label">WORLD CLOCK</div>
+          <div class="worldrow"><span>Philippines</span><strong id="phTime">--:--</strong></div>
+          <div class="worldrow"><span>London · UTC</span><strong id="utcTime">--:--</strong></div>
+          <div class="worldrow"><span>New York</span><strong id="nyTime">--:--</strong></div>
+        </section>
+
+        <section class="glass card recipe-card" aria-label="Filipino recipe carousel">
+          <div class="label">FILIPINO RECIPE</div>
+          <div class="recipe-top">
+            <img class="recipe-image" id="recipeImage" alt="" hidden>
+            <div>
+              <div class="recipe-name" id="recipeName">Finding a Filipino recipe...</div>
+              <div class="recipe-meta" id="recipeMeta">From TheMealDB</div>
+            </div>
+          </div>
+          <div class="recipe-details">
+            <div class="recipe-section-label">INGREDIENTS</div>
+            <div class="recipe-copy" id="recipeIngredients"></div>
+            <div class="recipe-section-label">METHOD</div>
+            <div class="recipe-copy" id="recipeMethod">Loading recipes from TheMealDB...</div>
+          </div>
+          <a class="recipe-source" id="recipeSource" href="https://www.themealdb.com/" target="_blank" rel="noopener noreferrer" hidden></a>
+          <div class="recipe-controls" role="group" aria-label="Recipe carousel controls">
+            <div class="recipe-position" id="recipePosition" aria-live="polite"></div>
+            <div class="recipe-buttons">
+              <button class="recipe-button" id="previousRecipe" type="button" aria-label="Previous recipe" title="Previous recipe" disabled>‹</button>
+              <button class="recipe-button" id="randomRecipe" type="button" aria-label="Random recipe" title="Random recipe" disabled>⤨</button>
+              <button class="recipe-button" id="nextRecipe" type="button" aria-label="Next recipe" title="Next recipe" disabled>›</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer">A LITTLE CLARITY FOR EVERY DAY</footer>
+    </div>
+
+    <script>
+      (() => {
+        const getElement = (id) => document.getElementById(id);
+        const fullscreenButton = getElement("fullscreenButton");
+        const fullscreenLabel = fullscreenButton.querySelector(".fullscreen-label");
+        const fullscreenStatus = getElement("fullscreenStatus");
+        const dateFormatter = new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+        const worldClockFormatters = {
+          philippines: new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Manila",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23",
+          }),
+          london: new Intl.DateTimeFormat("en-GB", {
+            timeZone: "UTC",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23",
+          }),
+          newYork: new Intl.DateTimeFormat("en-GB", {
+            timeZone: "America/New_York",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23",
+          }),
+        };
+        const weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=15.27386&longitude=120.56683&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code&timezone=Asia%2FManila";
+        const verseUrl = "https://www.bible.com/verse-of-the-day";
+        const recipeListUrl = "https://www.themealdb.com/api/json/v1/1/filter.php?a=Filipino";
+        let fullscreenStatusTimer;
+        let recipes = [];
+        let recipeIndex = -1;
+        let recipeLoading = false;
+        let recipeRequest = 0;
+
+        function isFullscreen() {
+          return Boolean(
+            document.fullscreenElement ||
+              document.webkitFullscreenElement ||
+              document.webkitIsFullScreen,
+          );
+        }
+
+        function updateFullscreenButton() {
+          const active = isFullscreen();
+          const label = active ? "Exit fullscreen" : "Fullscreen";
+          fullscreenButton.setAttribute(
+            "aria-label",
+            active ? "Exit fullscreen" : "Enter fullscreen",
+          );
+          fullscreenButton.title = active ? "Exit fullscreen" : "Enter fullscreen";
+          fullscreenLabel.textContent = label;
+        }
+
+        function showFullscreenStatus(message) {
+          fullscreenStatus.textContent = message;
+          clearTimeout(fullscreenStatusTimer);
+          fullscreenStatusTimer = setTimeout(() => {
+            fullscreenStatus.textContent = "";
+          }, 6000);
+        }
+
+        function showFullscreenError() {
+          showFullscreenStatus(
+            "Fullscreen isn't available in this Safari session. Add this page to your Home Screen for an app-like view.",
+          );
+        }
+
+        fullscreenButton.addEventListener("click", () => {
+          const active = isFullscreen();
+          const target = active ? document : document.documentElement;
+          const action = active
+            ? document.exitFullscreen || document.webkitExitFullscreen
+            : target.requestFullscreen || target.webkitRequestFullscreen;
+
+          if (!action) {
+            showFullscreenError();
+            return;
+          }
+
+          try {
+            const result = action.call(target);
+            if (result && typeof result.catch === "function") {
+              result.catch(showFullscreenError);
+            }
+          } catch {
+            showFullscreenError();
+          }
+        });
+
+        function updateClock() {
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const displayedHour = hours % 12 || 12;
+
+          getElement("clockTime").textContent = `${displayedHour}:${minutes}`;
+          getElement("clockPeriod").textContent = hours >= 12 ? "PM" : "AM";
+          getElement("date").textContent = dateFormatter.format(now);
+          getElement("greeting").textContent =
+            hours < 12
+              ? "Good morning. Take a moment for yourself."
+              : hours < 18
+                ? "Good afternoon. Stay grounded in today."
+                : "Good evening. Let the day settle.";
+          getElement("phTime").textContent = worldClockFormatters.philippines.format(now);
+          getElement("utcTime").textContent = worldClockFormatters.london.format(now);
+          getElement("nyTime").textContent = worldClockFormatters.newYork.format(now);
+        }
+
+        async function loadVerseOfDay() {
+          try {
+            const response = await fetch(verseUrl);
+            if (!response.ok) {
+              throw new Error("Verse of the day request failed");
+            }
+
+            const html = await response.text();
+            const page = new DOMParser().parseFromString(html, "text/html");
+            const verseAnchor = Array.from(page.querySelectorAll('a[href*="/bible/"]')).find(
+              (anchor) => {
+                const href = anchor.getAttribute("href") || "";
+                return /^\/bible\/\d+\//.test(href) && anchor.textContent.trim().length > 40;
+              },
+            );
+
+            if (!verseAnchor) {
+              throw new Error("YouVersion verse was not found");
+            }
+
+            const reference = verseAnchor.parentElement.querySelector("p");
+            if (!reference) {
+              throw new Error("YouVersion reference was not found");
+            }
+
+            getElement("verse").textContent = verseAnchor.textContent.trim();
+            getElement("verseRef").textContent = reference.textContent.trim();
+            const source = getElement("verseSource");
+            source.href = new URL(verseAnchor.getAttribute("href"), "https://www.bible.com").href;
+            source.textContent = "Read on YouVersion ↗";
+          } catch {
+            getElement("verse").textContent = "Today's verse could not be loaded.";
+            getElement("verseRef").textContent = "";
+            const source = getElement("verseSource");
+            source.href = verseUrl;
+            source.textContent = "Open YouVersion's Verse of the Day ↗";
+          }
+        }
+
+        async function showRecipe(index) {
+          if (!recipes.length) {
+            return;
+          }
+
+          recipeIndex = (index + recipes.length) % recipes.length;
+          const recipe = recipes[recipeIndex];
+          const requestId = ++recipeRequest;
+          const recipeImage = getElement("recipeImage");
+          const recipeSource = getElement("recipeSource");
+
+          getElement("recipeName").textContent = recipe.strMeal;
+          getElement("recipeMeta").textContent = "Filipino recipe · Loading details...";
+          getElement("recipeIngredients").textContent = "";
+          getElement("recipeMethod").textContent = "Loading recipe details...";
+          getElement("recipePosition").textContent = `${recipeIndex + 1} / ${recipes.length}`;
+          recipeImage.hidden = true;
+          recipeImage.removeAttribute("src");
+          recipeImage.alt = recipe.strMeal;
+          recipeImage.onerror = () => {
+            if (requestId === recipeRequest) {
+              recipeImage.hidden = true;
+            }
+          };
+          recipeSource.hidden = true;
+
+          if (recipe.strMealThumb) {
+            recipeImage.src = recipe.strMealThumb;
+            recipeImage.hidden = false;
+          }
+
+          try {
+            const response = await fetch(
+              `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(recipe.idMeal)}`,
+            );
+            if (!response.ok) {
+              throw new Error("Recipe details request failed");
+            }
+
+            const data = await response.json();
+            if (requestId !== recipeRequest) {
+              return;
+            }
+
+            const meal = data.meals && data.meals[0];
+            if (!meal) {
+              throw new Error("Recipe details were not found");
+            }
+
+            const ingredients = [];
+            for (let index = 1; index <= 20; index += 1) {
+              const ingredient = (meal[`strIngredient${index}`] || "").trim();
+              if (!ingredient) {
+                continue;
+              }
+
+              const measure = (meal[`strMeasure${index}`] || "").trim();
+              ingredients.push(`${measure ? `${measure} ` : ""}${ingredient}`);
+            }
+
+            getElement("recipeMeta").textContent =
+              [meal.strArea, meal.strCategory].filter(Boolean).join(" · ") || "From TheMealDB";
+            getElement("recipeIngredients").textContent =
+              ingredients.join(" · ") || "See the original recipe for ingredients.";
+            getElement("recipeMethod").textContent =
+              (meal.strInstructions || "").trim() || "See the original recipe for the method.";
+            recipeSource.href = meal.strSource || "https://www.themealdb.com/";
+            recipeSource.textContent = meal.strSource
+              ? "Original recipe · TheMealDB ↗"
+              : "TheMealDB ↗";
+            recipeSource.hidden = false;
+          } catch {
+            if (requestId !== recipeRequest) {
+              return;
+            }
+
+            getElement("recipeMeta").textContent = "TheMealDB details unavailable";
+            getElement("recipeMethod").textContent =
+              "Check your connection and choose another recipe to retry.";
+          }
+        }
+
+        async function loadRecipes() {
+          if (recipeLoading) {
+            return;
+          }
+
+          recipeLoading = true;
+          getElement("recipeName").textContent = "Finding a Filipino recipe...";
+          getElement("recipeMeta").textContent = "From TheMealDB";
+          getElement("recipeIngredients").textContent = "";
+          getElement("recipeMethod").textContent = "Loading recipes from TheMealDB...";
+          getElement("recipeSource").hidden = true;
+          getElement("recipeImage").hidden = true;
+          getElement("randomRecipe").disabled = true;
+
+          try {
+            const response = await fetch(recipeListUrl);
+            if (!response.ok) {
+              throw new Error("Recipe list request failed");
+            }
+
+            const data = await response.json();
+            if (!data.meals || !data.meals.length) {
+              throw new Error("No Filipino recipes were found");
+            }
+
+            recipes = data.meals;
+            getElement("previousRecipe").disabled = recipes.length < 2;
+            getElement("nextRecipe").disabled = recipes.length < 2;
+            showRecipe(Math.floor(Math.random() * recipes.length));
+          } catch {
+            recipes = [];
+            recipeIndex = -1;
+            getElement("recipeName").textContent = "Recipes unavailable";
+            getElement("recipeMeta").textContent = "TheMealDB could not be reached";
+            getElement("recipeIngredients").textContent = "";
+            getElement("recipeMethod").textContent =
+              "Check your internet connection, then tap shuffle to retry.";
+            getElement("recipePosition").textContent = "";
+            getElement("previousRecipe").disabled = true;
+            getElement("nextRecipe").disabled = true;
+          } finally {
+            recipeLoading = false;
+            getElement("randomRecipe").disabled = false;
+          }
+        }
+
+        function showRandomRecipe() {
+          if (!recipes.length) {
+            loadRecipes();
+            return;
+          }
+
+          const randomIndex = Math.floor(Math.random() * (recipes.length - 1));
+          const nextIndex = randomIndex >= recipeIndex ? randomIndex + 1 : randomIndex;
+          showRecipe(nextIndex);
+        }
+
+        function getWeather(code) {
+          if (code === 0) return ["☀️", "Clear sky"];
+          if (code === 1 || code === 2) return ["🌤️", "Mostly clear"];
+          if (code === 3) return ["☁️", "Cloudy"];
+          if (code === 45 || code === 48) return ["🌫️", "Fog"];
+          if (code >= 51 && code <= 67) return ["🌦️", "Drizzle / rain"];
+          if (code >= 80 && code <= 82) return ["🌧️", "Rain showers"];
+          if (code >= 95) return ["⛈️", "Thunderstorm"];
+          return ["☁️", "Current conditions"];
+        }
+
+        async function loadWeather() {
+          try {
+            const response = await fetch(weatherUrl);
+            if (!response.ok) {
+              throw new Error("Weather request failed");
+            }
+
+            const data = await response.json();
+            const current = data.current;
+            const [icon, condition] = getWeather(current.weather_code);
+            getElement("temp").textContent = `${Math.round(current.temperature_2m)}°`;
+            getElement("condition").textContent = condition;
+            getElement("weatherIcon").textContent = icon;
+            getElement("feels").textContent = `Feels like ${Math.round(current.apparent_temperature)}°`;
+            getElement("humidity").textContent = `Humidity ${current.relative_humidity_2m}%`;
+            getElement("weatherStatus").textContent = `Updated ${new Date().toLocaleTimeString()}`;
+          } catch {
+            getElement("weatherStatus").textContent = "Weather temporarily unavailable";
+          }
+        }
+
+        document.addEventListener("fullscreenchange", updateFullscreenButton);
+        document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+        getElement("previousRecipe").addEventListener("click", () => showRecipe(recipeIndex - 1));
+        getElement("nextRecipe").addEventListener("click", () => showRecipe(recipeIndex + 1));
+        getElement("randomRecipe").addEventListener("click", showRandomRecipe);
+
+        updateFullscreenButton();
+        updateClock();
+        loadVerseOfDay();
+        loadWeather();
+        loadRecipes();
+        setInterval(updateClock, 1000);
+        setInterval(loadWeather, 15 * 60 * 1000);
+      })();
+    </script>
+  </body>
+</html>
